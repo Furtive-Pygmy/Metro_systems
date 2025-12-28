@@ -90,13 +90,13 @@ public class FareDAO {
         String toRoute, String toStation,
         String cardId) throws SQLException {
 
-    String sql = """
-        SELECT f.fare, f.time, f.distance, f.stations_between,
-               s.balance, s.cardtype, s.expiry_date
-        FROM faretable f
-        JOIN smartcard s ON s.s_id = ?
-        WHERE f.route1=? AND f.stn1=? AND f.route2=? AND f.stn2=?
-    """;
+    String sql = "SELECT f.fare, f.time, f.distance, f.stations_between, " +
+             "s.balance, s.cardtype, s.expiry_date " +
+             "FROM faretable f " +
+             "JOIN smartcard s ON s.s_id = ? " +
+             "WHERE f.route1 = ? AND f.stn1 = ? AND f.route2 = ? AND f.stn2 = ?";
+
+
 
     try (Connection con = DBConnection.getConnection();
          PreparedStatement ps = con.prepareStatement(sql)) {
@@ -112,7 +112,7 @@ public class FareDAO {
         if (rs.next()) {
             return new FareCardInfo(
                     rs.getDouble("fare"),
-                    rs.getDouble("balance"),
+                    Double.parseDouble(rs.getString("balance")), // convert String to double
                     rs.getString("cardtype"),
                     rs.getDate("expiry_date"),
                     rs.getString("time"),
