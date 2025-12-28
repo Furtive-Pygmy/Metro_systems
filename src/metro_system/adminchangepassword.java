@@ -147,64 +147,42 @@ public class adminchangepassword extends javax.swing.JInternalFrame implements c
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        if(jPasswordField2.getText() .equals(jPasswordField3.getText()))
-        {
-            Connection myconnection;
-          try
-        {
-        myconnection=DriverManager.getConnection(path+place, username, password);
-        try
-        { 
-            int a= JOptionPane.showConfirmDialog(rootPane, "Do you really want to Change Password? Username:"+ this.username, "Confirm", JOptionPane.YES_NO_OPTION);
-             if(a==JOptionPane.YES_OPTION)
-             {
-         
-            String query2="select * from admintable where username=? and password=?";
-            PreparedStatement mystatement2=myconnection.prepareStatement(query2);
-            mystatement2.setString(1, this.username);
-            mystatement2.setString(2, jPasswordField1.getText());
-            ResultSet myresult2=mystatement2.executeQuery();
-            
-          
-           if(myresult2.next())
-            {
-               String query4="update admintable set password=? where username=?";
-               PreparedStatement mystatement4=myconnection.prepareStatement(query4);
-               mystatement4.setString(1, jPasswordField2.getText());
-               mystatement4.setString(2, this.username);
-               if(mystatement4.executeUpdate()>0)
-               {
-                   JOptionPane.showMessageDialog(rootPane, "Password changed Successfully.");
-                   login lg=new login();
-                   lg.setVisible(true);
-                   this.dispose();
-               }
-            }
-            else
-            {
-                JOptionPane.showMessageDialog(rootPane, "Incorrect Username/Password");
-            }
-             }
+    private boolean validatePasswordMatch() {
+        if (!jPasswordField2.getText().equals(jPasswordField3.getText())) {
+            showMessage("Password doesn't match");
+            return false;
         }
-          catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(null, "Changing Password Error."+e.getMessage());
-        }
-        finally
-        {
-            myconnection.close();
-        }
+        return true;
     }
-           catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(null, "Connection Error."+e.getMessage());
-        }
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(rootPane, "Password doesn't match");
+
+    private boolean promptConfirmation() {
+        int a = JOptionPane.showConfirmDialog(rootPane,
+                "Do you really want to change password? Username: " + username,
+                "Confirm", JOptionPane.YES_NO_OPTION);
+        return a == JOptionPane.YES_OPTION;
+    }
+
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(rootPane, message);
+    }
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        if (!validatePasswordMatch()) return;
+        if (!promptConfirmation()) return;
+
+        AdminDAO dao = new AdminDAO();
+        try {
+            if (!dao.validatePassword(username, jPasswordField1.getText())) {
+                showMessage("Incorrect Username/Password");
+                return;
+            }
+            if (dao.updatePassword(username, jPasswordField2.getText())) {
+                showMessage("Password changed Successfully");
+                login lg = new login();
+                lg.setVisible(true);
+                this.dispose();
+            }
+        } catch (Exception e) {
+            showMessage("Error: " + e.getMessage());
         }
     }//GEN-LAST:event_jButton5ActionPerformed
 

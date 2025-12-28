@@ -5,12 +5,7 @@
  */
 package metro_system;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.text.SimpleDateFormat;
 import javax.swing.JOptionPane;
-import static metro_system.mainframe.jDesktopPane1;
 
 
 /**
@@ -18,6 +13,7 @@ import static metro_system.mainframe.jDesktopPane1;
  * @author sparsh
  */
 public class addroute extends javax.swing.JInternalFrame implements convar {
+    private final RouteDAO routeDAO = new RouteDAO();
 
     /**
      * Creates new form addroute
@@ -116,46 +112,37 @@ public class addroute extends javax.swing.JInternalFrame implements convar {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-              Connection myconnection;
-        
-        
-        try{
-             myconnection =DriverManager.getConnection(path+place, username, password);
-             try
-             {
-                 String query="insert into routetable values(?)";
-                 PreparedStatement mystatement=myconnection.prepareStatement(query);
-                 mystatement.setString(1, jTextField1.getText());
-                
-                 if(mystatement.executeUpdate()>0)
-                 {
-                     JOptionPane.showMessageDialog(rootPane, "Information Sored Successfully");
-                 }
-                 jTextField1.setText("");
-             }
-             catch(Exception e)
-             {
-                 JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-             }
-             finally
-                     {
-                         myconnection.close();
-                     }
+              String routeName = jTextField1.getText().trim();
+
+        if (routeName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Route name cannot be empty");
+            return;
         }
-        
-        catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
+
+        try {
+            if (routeDAO.addRoute(routeName)) {
+                JOptionPane.showMessageDialog(this,
+                        "Information Stored Successfully");
+                jTextField1.setText("");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error: " + e.getMessage());
         }
+
       
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-addstation obj=new addstation();
-            jDesktopPane1.add(obj);
-            obj.setVisible(true);  
-            this.dispose();// TODO add your handling code here:
+        openAddStation();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void openAddStation() {
+        addstation obj = new addstation();
+        getDesktopPane().add(obj);
+        obj.setVisible(true);
+        this.dispose();
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -4,12 +4,8 @@
  * and open the template in the editor.
  */
 package metro_system;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JOptionPane;
 
@@ -19,52 +15,27 @@ import javax.swing.JOptionPane;
  * @author sparsh
  */
 public class cardbook extends javax.swing.JInternalFrame implements convar {
-
-        static double fare,bal,rem_bal; 
-        
-        public void generatebookNo()
-    {
-      Connection myconnection2;
-       
-       try
-           
-           
-       {
-           myconnection2=DriverManager.getConnection(path+place, username, password);
-           try
-           {
-              String query2="select max(book_no) from bookingcard";
-              PreparedStatement mystatement2=myconnection2.prepareStatement(query2);
-              ResultSet myresult2=mystatement2.executeQuery();
-              if(myresult2.next())
-              {
-               jLabel24.setText(String.valueOf(myresult2.getInt(1)+1));
-          
-              }
-           }
-               catch(Exception e)
-           {
-               JOptionPane.showMessageDialog(rootPane, "Incriment Error:"+e.getMessage());
-           }
-           finally
-           {
-               myconnection2.close();
-           }
-           
-       }
-       catch(Exception e)
-       {
-           JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
-       } 
-    }
     /**
      * Creates new form token
      */
-    public cardbook() {
+    private final BookingService bookingService;
+    private double fare;
+    private double balance;
+    private SearchCriteria criteria;
+    public cardbook(SearchCriteria criteria) {
         initComponents();
-        generatebookNo();
-     
+        this.criteria = criteria;
+        this.bookingService = new BookingService();
     }
+
+    public cardbook(String[] selection, String cardId) {
+    this(new SearchCriteria(
+        selection[0], selection[1],
+        selection[2], selection[3],
+        cardId
+    ));
+}
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -283,145 +254,74 @@ public class cardbook extends javax.swing.JInternalFrame implements convar {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        if(bal>fare)
-        {
-            rem_bal=bal-fare;
-        Connection myconnection;
+        try {
+            double remaining =
+                bookingService.calculateRemainingBalance(balance, fare);
 
-        try{
-            myconnection =DriverManager.getConnection(path+place, username, password);
-            try
-            {
-                String query="insert into bookingcard values(?,?,?,?,?,?,?,?,?,?,?,?)";
-                PreparedStatement mystatement=myconnection.prepareStatement(query);
-                mystatement.setString(1,  jLabel9.getText());
-                mystatement.setString(2,  jLabel10.getText());
-                mystatement.setString(3,  jLabel11.getText());
-                mystatement.setString(4,  jLabel12.getText());
-                mystatement.setString(5,  jLabel13.getText());
-                mystatement.setString(6,  String.valueOf(bal));
-                mystatement.setString(7,  jLabel19.getText());
+            BookingCard booking = new BookingCard();
+            booking.setFromRoute(jLabel9.getText());
+            booking.setFromStation(jLabel10.getText());
+            booking.setToRoute(jLabel11.getText());
+            booking.setToStation(jLabel12.getText());
+            booking.setCardId(jLabel17.getText());
+            booking.setRemainingBalance(remaining);
+            booking.setBookingNo(jLabel24.getText());
+            booking.setBookingDate(
+                new SimpleDateFormat("yyyy-MM-dd").format(new Date())
+            );
 
-                mystatement.setString(8,  jLabel17.getText());
-                mystatement.setString(9,  jLabel20.getText());
-                mystatement.setString(10,  jLabel21.getText());
-                mystatement.setString(11,  jLabel23.getText());
-                mystatement.setString(12,  jLabel24.getText());
+            bookingService.completeBooking(booking);
 
-                SimpleDateFormat myFormat;
-                myFormat = new SimpleDateFormat("yyyy-MM-dd ");
-                java.util.Date date = new java.util.Date();    
-                mystatement.setString(11,  myFormat.format(date));
-                
-                if(  mystatement.executeUpdate()>0 )
-                {
-                    JOptionPane.showMessageDialog(rootPane, "Ticket booked successfully by card.Remaining balance  : "+rem_bal + " and Booking no. is : " + jLabel24.getText());
+            JOptionPane.showMessageDialog(
+                this,
+                "Ticket booked successfully!\nRemaining Balance: " + remaining
+            );
+            dispose();
 
-                }
-                query="update smartcard set balance =? where s_id= ?";
-                 PreparedStatement mystatement1=myconnection.prepareStatement(query);
-                 mystatement1.setString(1, String.valueOf(rem_bal));
-                 mystatement1.setString(2, jLabel17.getText());
-                 if(mystatement1.executeUpdate()>0)
-                 {
-                     JOptionPane.showMessageDialog(rootPane, "account balance updated successfully");
-                 }
-            }
-            catch(Exception e)
-            {
-                JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-            }
-            finally
-            {
-                myconnection.close();
-            }
-        }
-
-        catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
-        }
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(rootPane, "Balance in card is less than the fare price .Please add some money in the card first.");
-        this.dispose();
-        }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }    
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void formInternalFrameActivated(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameActivated
-  Connection myconnection;
-//         SimpleDateFormat myFormat;
-//                myFormat = new SimpleDateFormat("yyyy-MM-dd ");
-                java.util.Date date = new java.util.Date();    
-        
-        try{
-             myconnection =DriverManager.getConnection(path+place, username, password);
-             try
-             {
-                 String query="select * from faretable f,smartcard s where f.route1=? and f.stn1=? and f.route2=? and f.stn2=? and s.s_id=?";
-                 PreparedStatement mystatement=myconnection.prepareStatement(query);
-                 mystatement.setString(1, cardbooksearch.s[0]);
-                 mystatement.setString(2, cardbooksearch.s[1]);
-                 mystatement.setString(3, cardbooksearch.s[2]);
-                 mystatement.setString(4, cardbooksearch.s[3]);
-                 mystatement.setString(5, cardbooksearch.n);
-               //  System.out.print(cardbooksearch.s[0]);
-                 ResultSet myres = mystatement.executeQuery();
-                 if(myres.next())
-                 {if(date.before(myres.getDate(20)))
-                 {  fare=Double.parseDouble(myres.getString("fare"));
-                     bal=Double.parseDouble(myres.getString("balance"));
-                 
-                    jLabel9.setText(cardbooksearch.s[0]);
-                    jLabel10.setText(cardbooksearch.s[1]);
-                    jLabel11.setText(cardbooksearch.s[2]);
-                    jLabel12.setText(cardbooksearch.s[3]);
-                    jLabel17.setText(cardbooksearch.n);
-                    if(myres.getString("cardtype").equalsIgnoreCase("standard"))
-                    {   fare=(double)fare*.90;
-                        jLabel13.setText(String.valueOf(fare));
-                    }
-                    else
-                    {
-                        fare=(double)fare*.85;
-                                                jLabel13.setText(String.valueOf(fare));
+        try {
+            FareDAO fareDAO = new FareDAO();
+            FareCardInfo info = fareDAO.getFareForBooking(
+                    criteria.getFromRoute(),
+                    criteria.getFromStation(),
+                    criteria.getToRoute(),
+                    criteria.getToStation(),
+                    criteria.getCardId()
+            );
 
-                    }
-                    jLabel15.setText(myres.getString("balance"));
-                    jLabel19.setText(myres.getString(6));
-                    jLabel20.setText(myres.getString(7));
-                    jLabel21.setText(myres.getString(8));
-                    
-                      SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-//	   get current date time with Date()
-	 //  java.util.Date date = new java.util.Date();
-                     jLabel23.setText(dateFormat.format(date));
-                     
-                    
-                 }
-                 else{
-                     JOptionPane.showMessageDialog(rootPane, "The card has expired.Please renew.");
-                 }
-                  
-             }
-                 else{
-                     JOptionPane.showMessageDialog(rootPane, "i dont know whats wrong");
-                 }}
-             catch(Exception e)
-             {
-                 JOptionPane.showMessageDialog(rootPane, " double query Error:"+e.getMessage());
-             }
-              finally
-             {
-                 myconnection.close();
-             }
-             
-        }
-        
-        catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
+            bookingService.validateCard(info);
+
+            fare = bookingService.applyDiscount(
+                    info.getFare(),
+                    info.getCardType()
+            );
+            balance = info.getBalance();
+
+            // ---- UI population ----
+            jLabel9.setText(criteria.getFromRoute());
+            jLabel10.setText(criteria.getFromStation());
+            jLabel11.setText(criteria.getToRoute());
+            jLabel12.setText(criteria.getToStation());
+            jLabel17.setText(criteria.getCardId());
+
+            jLabel13.setText(String.valueOf(fare));
+            jLabel15.setText(String.valueOf(balance));
+            jLabel19.setText(info.getDistance());
+            jLabel20.setText(info.getTime());
+            jLabel21.setText(info.getStationsBetween());
+
+            jLabel23.setText(
+                new SimpleDateFormat("dd-MM-yyyy").format(new Date())
+            );
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+            dispose();
         }
     }//GEN-LAST:event_formInternalFrameActivated
 

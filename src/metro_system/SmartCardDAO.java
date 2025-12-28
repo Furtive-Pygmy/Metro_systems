@@ -8,6 +8,19 @@ import java.util.List;
 
 public class SmartCardDAO {
 
+    public void updateBalance(String cardId, double newBalance) throws Exception {
+
+        String sql = "UPDATE smartcard SET balance = ? WHERE s_id = ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setDouble(1, newBalance);
+            ps.setString(2, cardId);
+            ps.executeUpdate();
+        }
+    }
+
     public List<SmartCard> search(String cardId, String name) {
         List<SmartCard> list = new ArrayList<>();
 

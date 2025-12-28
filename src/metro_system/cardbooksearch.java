@@ -19,52 +19,70 @@ public class cardbooksearch extends javax.swing.JInternalFrame  implements conva
 
     static String s[]=new String[4];
     static String n;
-    /**
-     * Creates new form tokensearch
-     */
+    private String[] selection = new String[4];
+    private String cardId;
+
     public cardbooksearch() {
         initComponents();
-      
-       // jSpinner1.setValue(a);
-        Connection myconnection;
-        
-        
-        try{
-             myconnection =DriverManager.getConnection(path+place, username, password);
-             try
-             {
-                 String query="select * from routetable";
-                 PreparedStatement mystatement=myconnection.prepareStatement(query);
-                 ResultSet myres = mystatement.executeQuery();
-                 if(myres.next())
-                 {
-                      do
-                      {
-                          jComboBox3.addItem(myres.getString("route"));
-                            jComboBox2.addItem(myres.getString("route"));
-                      }
-                      while(myres.next());
+        loadRoutes();
+    }
+    private void loadRoutes() {
+        String sql = "SELECT route FROM routetable";
 
-       
-                     
-                 }
-             }
-             catch(Exception e)
-             {
-                 JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-             }
-             finally
-                     {
-                         myconnection.close();
-                     }
-        }
-        
-        catch(Exception e)
-        {
-            JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            jComboBox2.addItem("Choose Route");
+            jComboBox3.addItem("Choose Route");
+
+            while (rs.next()) {
+                String route = rs.getString("route");
+                jComboBox2.addItem(route);
+                jComboBox3.addItem(route);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading routes: " + e.getMessage());
         }
     }
 
+    private void loadStations(String route, javax.swing.JComboBox<String> targetCombo) {
+        String sql = "SELECT stn_name FROM stationtable WHERE route=?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, route);
+            ResultSet rs = ps.executeQuery();
+
+            targetCombo.removeAllItems();
+            targetCombo.addItem("Choose Station");
+
+            while (rs.next()) {
+                targetCombo.addItem(rs.getString("stn_name"));
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading stations: " + e.getMessage());
+        }
+    }
+
+    private boolean smartCardExists(String cardId) {
+        String sql = "SELECT 1 FROM smartcard WHERE s_id=?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, cardId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error checking smart card: " + e.getMessage());
+            return false;
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -175,165 +193,46 @@ public class cardbooksearch extends javax.swing.JInternalFrame  implements conva
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox3ActionPerformed
-        Connection myconnection;
-
-        if(jComboBox3.getSelectedIndex()>0){
-            try{
-                myconnection =DriverManager.getConnection(path+place, username, password);
-                try
-                {
-                    String query="select * from stationtable where route=?";
-                    PreparedStatement mystatement=myconnection.prepareStatement(query);
-                    mystatement.setString(1, jComboBox3.getSelectedItem().toString());
-
-                    ResultSet myres = mystatement.executeQuery();
-                    jComboBox5.removeAllItems();
-                    jComboBox5.addItem("choose station");
-                    if(myres.next())
-                    {  
-                        do
-                        {
-                            jComboBox5.addItem(myres.getString("stn_name"));
-
-                        }
-                        while(myres.next());
-
-                    }
-                }
-                catch(Exception e)
-                {
-                    JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-                }
-                finally
-                {
-                    myconnection.close();
-                }
-            }
-
-            catch(Exception e)
-            {
-                JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
-            }
+        if (jComboBox3.getSelectedIndex() > 0) {
+            loadStations(jComboBox3.getSelectedItem().toString(), jComboBox5);
         }
-        else{
-            jComboBox5.addItem("choose route first");
-        }        // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox3ActionPerformed
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
-        Connection myconnection;
-
-        if(jComboBox2.getSelectedIndex()>0){
-            try{
-                myconnection =DriverManager.getConnection(path+place, username, password);
-                try
-                {
-                    String query="select * from stationtable where route=?";
-                    PreparedStatement mystatement=myconnection.prepareStatement(query);
-                    mystatement.setString(1, jComboBox2.getSelectedItem().toString());
-                    ResultSet myres = mystatement.executeQuery();
-                    jComboBox4.removeAllItems();
-                        jComboBox4.addItem("choose station");
-                    if(myres.next())
-                    {  
-                        do
-                        {
-                            jComboBox4.addItem(myres.getString("stn_name"));
-
-                        }
-                        while(myres.next());
-
-                    }
-                }
-                catch(Exception e)
-                {
-                    JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-                }
-                finally
-                {
-                    myconnection.close();
-                }
-            }
-
-            catch(Exception e)
-            {
-                JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
-            }
-        }
-        else{
-            jComboBox4.addItem("choose route first");
+        if (jComboBox2.getSelectedIndex() > 0) {
+            loadStations(jComboBox2.getSelectedItem().toString(), jComboBox4);
         }
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-                s[0] = jComboBox2.getSelectedItem().toString();
-                s[1] = jComboBox4.getSelectedItem().toString();
-                s[2] = jComboBox3.getSelectedItem().toString();
-                s[3] = jComboBox5.getSelectedItem().toString();
-                n = jTextField1.getText();    
-        boolean flag=false;
-                         if(jComboBox2.getSelectedIndex()>0 && jComboBox3.getSelectedIndex()>0 && jComboBox4.getSelectedIndex()>0 && jComboBox5.getSelectedIndex()>0 && !jTextField1.getText().equals("") )
-
-                         {Connection myconnection;
-               
-
-        
-            try{
-                myconnection =DriverManager.getConnection(path+place, username, password);
-                try
-                {
-                    String query="select * from smartcard where s_id=?";
-                    PreparedStatement mystatement=myconnection.prepareStatement(query);
-                    mystatement.setString(1, jTextField1.getText());
-                    ResultSet myres = mystatement.executeQuery();
-                    if(myres.next())
-                    { 
-                        flag=true;
-                        
-                    }
-                    else 
-                    {
-                        JOptionPane.showMessageDialog(rootPane, "Wrong Smart card ID .");
-                        flag=false;
-                    }
-                }
-                catch(Exception e)
-                {
-                    JOptionPane.showMessageDialog(rootPane, "Error:"+e.getMessage());
-                }
-                finally
-                {
-                    myconnection.close();
-                    
-                }
-            }
-
-            catch(Exception e)
-            {
-                JOptionPane.showMessageDialog(rootPane, "Connection Error:"+e.getMessage());
-            }
-      try{  if (flag)
-        {
-//             
-//                 
-                cardbook obj=new cardbook();
-                mainframe.jDesktopPane1.add(obj);
-                obj.setVisible(true);
+         if (!isInputValid()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields correctly");
+            return;
         }
-      }
-      catch(Exception e)
-      {
-          JOptionPane.showMessageDialog(rootPane, "this statement is not working"+e.getMessage());
-      }
-                
-                         }
-                         else
-                         {
-                             JOptionPane.showMessageDialog(rootPane, "Please select appropriate choce/fill in the fields");
-                         }
-                
-    }//GEN-LAST:event_jButton1ActionPerformed
 
+        cardId = jTextField1.getText();
+
+        if (!smartCardExists(cardId)) {
+            JOptionPane.showMessageDialog(this, "Wrong Smart Card ID");
+            return;
+        }
+
+        selection[0] = jComboBox2.getSelectedItem().toString();
+        selection[1] = jComboBox4.getSelectedItem().toString();
+        selection[2] = jComboBox3.getSelectedItem().toString();
+        selection[3] = jComboBox5.getSelectedItem().toString();
+
+        cardbook obj = new cardbook(selection, cardId);
+        mainframe.jDesktopPane1.add(obj);
+        obj.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+    private boolean isInputValid() {
+        return jComboBox2.getSelectedIndex() > 0 &&
+               jComboBox3.getSelectedIndex() > 0 &&
+               jComboBox4.getSelectedIndex() > 0 &&
+               jComboBox5.getSelectedIndex() > 0 &&
+               !jTextField1.getText().trim().isEmpty();
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
