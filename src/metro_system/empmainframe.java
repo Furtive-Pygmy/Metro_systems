@@ -294,7 +294,7 @@ empcardbooksearch obj=new empcardbooksearch();
     }//GEN-LAST:event_jMenuItem18ActionPerformed
 
     private void jMenuItem19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem19ActionPerformed
-       empchangepassword obj=new empchangepassword();
+         empchangepassword obj=new empchangepassword(this.currentUser);
             jDesktopPane1.add(obj);
             obj.setVisible(true); 
     }//GEN-LAST:event_jMenuItem19ActionPerformed
