@@ -14,10 +14,18 @@ import javax.swing.JOptionPane;
  */
 public class mainframe extends javax.swing.JFrame {
 
+    private String currentUser = "";
+
     /**
      * Creates new form mainframe
      */
     public mainframe() {
+        this.currentUser = "";
+        initComponents();
+    }
+
+    public mainframe(String currentUser) {
+        this.currentUser = currentUser;
         initComponents();
     }
 
@@ -366,7 +374,7 @@ public class mainframe extends javax.swing.JFrame {
             obj.setVisible(true);      }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
-updatemetro obj=new updatemetro();
+            updatemetro obj=new updatemetro();
             jDesktopPane1.add(obj);
             obj.setVisible(true);     }//GEN-LAST:event_jMenuItem5ActionPerformed
 
@@ -378,7 +386,7 @@ updatemetro obj=new updatemetro();
     }//GEN-LAST:event_jMenuItem6ActionPerformed
 
     private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
-addfare obj=new addfare();
+            addfare obj=new addfare();
             jDesktopPane1.add(obj);
             obj.setVisible(true);        // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem7ActionPerformed
@@ -402,12 +410,12 @@ addfare obj=new addfare();
     }//GEN-LAST:event_jMenu6MouseClicked
 
     private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
-newsmartcard obj=new newsmartcard();
+            newsmartcard obj=new newsmartcard();
             jDesktopPane1.add(obj);
             obj.setVisible(true);     }//GEN-LAST:event_jMenuItem9ActionPerformed
 
     private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
-cardbooksearch obj=new cardbooksearch();
+            cardbooksearch obj=new cardbooksearch();
             jDesktopPane1.add(obj);
             obj.setVisible(true);     }//GEN-LAST:event_jMenuItem10ActionPerformed
 
@@ -418,7 +426,7 @@ cardbooksearch obj=new cardbooksearch();
     }//GEN-LAST:event_jMenuItem11ActionPerformed
 
     private void jMenuItem12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem12ActionPerformed
- updatefare obj=new updatefare();
+            updatefare obj=new updatefare();
             jDesktopPane1.add(obj);
             obj.setVisible(true);     }//GEN-LAST:event_jMenuItem12ActionPerformed
 
@@ -429,12 +437,12 @@ cardbooksearch obj=new cardbooksearch();
     }//GEN-LAST:event_jMenuItem13ActionPerformed
 
     private void jMenuItem14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem14ActionPerformed
- addbalance obj=new addbalance();
+            addbalance obj=new addbalance();
             jDesktopPane1.add(obj);
             obj.setVisible(true);     }//GEN-LAST:event_jMenuItem14ActionPerformed
 
     private void jMenuItem15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem15ActionPerformed
-        deletesmartcard obj=new deletesmartcard();
+            deletesmartcard obj=new deletesmartcard();
             jDesktopPane1.add(obj);
             obj.setVisible(true); 
     }//GEN-LAST:event_jMenuItem15ActionPerformed
@@ -451,7 +459,7 @@ cardbooksearch obj=new cardbooksearch();
     }//GEN-LAST:event_jMenuItem18ActionPerformed
 
     private void jMenuItem19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem19ActionPerformed
-       changepassword obj=new changepassword();
+            changepassword obj=new changepassword();
             jDesktopPane1.add(obj);
             obj.setVisible(true); 
     }//GEN-LAST:event_jMenuItem19ActionPerformed
@@ -476,13 +484,13 @@ tokensearch obj=new tokensearch();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-cardbooksearch obj=new cardbooksearch();
+            cardbooksearch obj=new cardbooksearch();
             jDesktopPane1.add(obj);
             obj.setVisible(true);        // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jMenuItem16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem16ActionPerformed
-       adminchangepassword obj=new adminchangepassword();
+            adminchangepassword obj=new adminchangepassword(this.currentUser);
             jDesktopPane1.add(obj);
             obj.setVisible(true); 
     }//GEN-LAST:event_jMenuItem16ActionPerformed

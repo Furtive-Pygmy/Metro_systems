@@ -14,10 +14,18 @@ import javax.swing.JOptionPane;
  */
 public class empmainframe extends javax.swing.JFrame {
 
+    private String currentUser = "";
+
     /**
      * Creates new form mainframe
      */
     public empmainframe() {
+        this.currentUser = "";
+        initComponents();
+    }
+
+    public empmainframe(String currentUser) {
+        this.currentUser = currentUser;
         initComponents();
     }
 

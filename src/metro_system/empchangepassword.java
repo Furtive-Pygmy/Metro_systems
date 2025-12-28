@@ -21,7 +21,15 @@ public class empchangepassword extends javax.swing.JInternalFrame implements con
     /**
      * Creates new form createemployee
      */
+    private String username = "";
+
     public empchangepassword() {
+        this.username = "";
+        initComponents();
+    }
+
+    public empchangepassword(String username) {
+        this.username = username == null ? "" : username;
         initComponents();
     }
 
@@ -149,13 +157,13 @@ public class empchangepassword extends javax.swing.JInternalFrame implements con
         myconnection=DriverManager.getConnection(path+place, username, password);
         try
         { 
-            int a= JOptionPane.showConfirmDialog(rootPane, "Do you really want to Change Password? Username:"+login.s, "Confirm", JOptionPane.YES_NO_OPTION);
+            int a= JOptionPane.showConfirmDialog(rootPane, "Do you really want to Change Password? Username:"+this.username, "Confirm", JOptionPane.YES_NO_OPTION);
              if(a==JOptionPane.YES_OPTION)
              {
          
             String query2="select * from employeetable where username=? and password=?";
             PreparedStatement mystatement2=myconnection.prepareStatement(query2);
-            mystatement2.setString(1, login.s);
+            mystatement2.setString(1, this.username);
             mystatement2.setString(2, jPasswordField1.getText());
             ResultSet myresult2=mystatement2.executeQuery();
             
@@ -165,7 +173,7 @@ public class empchangepassword extends javax.swing.JInternalFrame implements con
                String query4="update employeetable set password=? where username=?";
                PreparedStatement mystatement4=myconnection.prepareStatement(query4);
                mystatement4.setString(1, jPasswordField2.getText());
-               mystatement4.setString(2, login.s);
+               mystatement4.setString(2, this.username);
                if(mystatement4.executeUpdate()>0)
                {
                    JOptionPane.showMessageDialog(rootPane, "Password changed Successfully.");
